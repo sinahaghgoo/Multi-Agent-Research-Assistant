@@ -53,9 +53,13 @@ class ResearchAssistant:
             except Exception:
                 embedder = None
         self.search: SearchProvider | None = (
-            (DDGSSearch(settings.search_backend, settings.search_region, settings.http_timeout_s)
-             if settings.web_enabled else None)
-            if search == "auto" else search
+            (
+                DDGSSearch(settings.search_backend, settings.search_region, settings.http_timeout_s)
+                if settings.web_enabled
+                else None
+            )
+            if search == "auto"
+            else search
         )
 
         sources = local_sources(settings.corpus_dir)

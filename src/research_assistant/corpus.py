@@ -102,9 +102,7 @@ def parse_eurlex_html(raw: bytes) -> Iterator[Section]:
         number = art_id.split("_", 1)[1]
         heading = div.xpath('.//p[@class="oj-sti-art"]')
         title = normalize(heading[0].text_content()) if heading else ""
-        texts = [
-            t for t in _p_texts(div) if t != f"Article {number}" and t != title
-        ]
+        texts = [t for t in _p_texts(div) if t != f"Article {number}" and t != title]
         location = f"Article {number}" + (f" ({title})" if title else "")
         yield Section(f"art-{number}", location, _merge_labels(texts))
 
@@ -122,9 +120,7 @@ def parse_pdf(raw: bytes, header_lines: tuple[str, ...] = ()) -> Iterator[Sectio
     for index, page in enumerate(reader.pages, start=1):
         text = normalize(page.extract_text() or "")
         lines = [
-            line
-            for line in text.splitlines()
-            if not _PAGE_NUMBER.match(line) and line not in header_lines
+            line for line in text.splitlines() if not _PAGE_NUMBER.match(line) and line not in header_lines
         ]
         if sum(len(line.split()) for line in lines) < 25:
             continue  # cover pages, blank pages

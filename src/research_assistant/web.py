@@ -60,9 +60,7 @@ class DDGSSearch:
         for row in rows or []:
             url = row.get("href") or row.get("url")
             if url:
-                results.append(
-                    SearchResult(title=row.get("title", ""), url=url, snippet=row.get("body", ""))
-                )
+                results.append(SearchResult(title=row.get("title", ""), url=url, snippet=row.get("body", "")))
         return results[:max_results]
 
 

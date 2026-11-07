@@ -1,9 +1,9 @@
 """Command-line interface.
 
-    research-assistant prepare                 # build the local corpus index
-    research-assistant doctor                  # check Ollama, models and corpus
-    research-assistant examples                # list example questions
-    research-assistant ask "question" [opts]   # run the assistant
+research-assistant prepare                 # build the local corpus index
+research-assistant doctor                  # check Ollama, models and corpus
+research-assistant examples                # list example questions
+research-assistant ask "question" [opts]   # run the assistant
 """
 
 from __future__ import annotations
@@ -37,6 +37,7 @@ def _live_printer():
     def printer(event: TraceEvent) -> None:
         if event.kind in {"decision", "tool_call", "tool_result", "guard", "error", "node"}:
             print(f"  {event.one_line()}", file=sys.stderr)
+
     return printer
 
 
@@ -61,7 +62,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     status = check_ollama(settings)
     if status.reachable:
         print(f"[ok] Ollama reachable at {settings.ollama_base_url} ({len(status.models)} models)")
-        for model, label in [(settings.chat_model, "chat"), (settings.embedding_model, "embedding")]:
+        for model, label in [
+            (settings.chat_model, "chat"),
+            (settings.embedding_model, "embedding"),
+        ]:
             if status.has(model):
                 print(f"[ok] {label} model '{model}' available")
             else:
@@ -100,9 +104,7 @@ def cmd_ask(args: argparse.Namespace) -> int:
         return 2
     print(f"Index: {assistant.index_summary()}", file=sys.stderr)
     print(f"Running [{args.mode}]: {args.question}\n", file=sys.stderr)
-    out = assistant.run(
-        args.question, mode=args.mode, on_event=_live_printer() if args.trace else None
-    )
+    out = assistant.run(args.question, mode=args.mode, on_event=_live_printer() if args.trace else None)
     markdown = report_to_markdown(out.report)
     if args.output:
         Path(args.output).write_text(markdown, encoding="utf-8")
@@ -143,7 +145,9 @@ def main(argv: list[str] | None = None) -> int:
     p_ask.add_argument("question", help="the research question, or an example id")
     p_ask.add_argument("--mode", choices=["multi_agent", "single_agent"], default="multi_agent")
     p_ask.add_argument("--trace", action="store_true", help="stream agent activity to stderr")
-    p_ask.add_argument("--show-trace", action="store_true", help="print the full trace table after the report")
+    p_ask.add_argument(
+        "--show-trace", action="store_true", help="print the full trace table after the report"
+    )
     p_ask.add_argument("--save", action="store_true", help="save report + trace under runs/")
     p_ask.add_argument("-o", "--output", help="write the report Markdown to this file")
     _add_common(p_ask)

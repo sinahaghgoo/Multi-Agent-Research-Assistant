@@ -40,7 +40,6 @@ from .tools import ToolSession, Workspace, analysis_tools, web_tools
 from .validation import check_findings, citation_check, strip_invalid_inline
 
 MAX_WEB_ROUNDS = 2
-WRITER_RESERVE_S = 150.0
 
 
 def merge_dicts(left: dict, right: dict) -> dict:
@@ -94,7 +93,9 @@ class delegate_document_analysis(BaseModel):  # noqa: N801
 class finish_research(BaseModel):  # noqa: N801
     """Stop researching and write the report from the recorded evidence."""
 
-    reason: str = Field(description="Why the recorded evidence is sufficient, or why more steps would not help.")
+    reason: str = Field(
+        description="Why the recorded evidence is sufficient, or why more steps would not help."
+    )
 
 
 _TOOL_TO_ACTION = {
@@ -111,7 +112,11 @@ def _web_available(state: ResearchState, ws: Workspace) -> bool:
 def render_status(state: ResearchState, ws: Workspace) -> str:
     s = ws.settings
     turn = state.get("turn", 0) + 1
-    lines = [f"Research question: {state['question']}", "", f"Turn {turn} of {s.max_supervisor_turns}."]
+    lines = [
+        f"Research question: {state['question']}",
+        "",
+        f"Turn {turn} of {s.max_supervisor_turns}.",
+    ]
     if ws.search is None:
         lines.append("Web research: disabled for this run.")
     else:
@@ -120,7 +125,11 @@ def render_status(state: ResearchState, ws: Workspace) -> str:
             f"({state.get('web_rounds', 0)} of {MAX_WEB_ROUNDS} rounds used)."
         )
     sources = state.get("sources", {})
-    local = [f"{sid} ({ws.index.source_titles.get(sid, src.title)})" for sid, src in sources.items() if src.kind == "local"]
+    local = [
+        f"{sid} ({ws.index.source_titles.get(sid, src.title)})"
+        for sid, src in sources.items()
+        if src.kind == "local"
+    ]
     web = [f"{sid}: {src.title} <{src.url}>" for sid, src in sources.items() if src.kind == "web"]
     lines.append("Local documents: " + "; ".join(local))
     lines.append("Fetched web sources: " + ("; ".join(web) if web else "none"))
@@ -137,7 +146,9 @@ def render_status(state: ResearchState, ws: Workspace) -> str:
     if reports:
         lines.append("\nPrevious steps:")
         for i, r in enumerate(reports, start=1):
-            lines.append(f"{i}. {r.agent} — task: {truncate(r.task, 140)}\n   result: {truncate(r.summary, 300)}")
+            lines.append(
+                f"{i}. {r.agent} — task: {truncate(r.task, 140)}\n   result: {truncate(r.summary, 300)}"
+            )
     lines.append("\nCall exactly one tool to choose the next step.")
     return "\n".join(lines)
 
@@ -168,7 +179,7 @@ def supervisor_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[s
         return update
 
     # Hard stopping conditions, checked before asking the model.
-    if ws.time_left() < WRITER_RESERVE_S:
+    if ws.time_left() < s.writer_reserve_s:
         return guard("finish", "", "time budget nearly used; reserving time for the writer", "deadline")
     if state.get("turn", 0) >= s.max_supervisor_turns:
         return guard("finish", "", f"reached {s.max_supervisor_turns} supervisor turns", "turn_limit")
@@ -179,7 +190,10 @@ def supervisor_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[s
     if _web_available(state, ws):
         tools.insert(0, delegate_web_research)
     bound = ws.llm.bind_tools(tools)
-    messages: list[BaseMessage] = [SystemMessage(prompts.SUPERVISOR), HumanMessage(render_status(state, ws))]
+    messages: list[BaseMessage] = [
+        SystemMessage(prompts.SUPERVISOR),
+        HumanMessage(render_status(state, ws)),
+    ]
 
     call = None
     for attempt in range(2):
@@ -192,23 +206,40 @@ def supervisor_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[s
         if valid:
             call = valid[0]
             if len(ai.tool_calls) > 1:
-                tracer.emit("supervisor", "guard", "extra_tool_calls_ignored", summary=f"{len(ai.tool_calls)} calls; used the first")
+                tracer.emit(
+                    "supervisor",
+                    "guard",
+                    "extra_tool_calls_ignored",
+                    summary=f"{len(ai.tool_calls)} calls; used the first",
+                )
             break
         messages += [ai, HumanMessage("You must call exactly one of the provided tools.")]
         tracer.emit("supervisor", "guard", "no_tool_call", summary=f"attempt {attempt + 1}")
 
     if call is None:  # deterministic fallback policy
         if state.get("analysis_rounds", 0) == 0 or pending:
-            return guard("document_analysis", question, "no valid decision from model; default to document analysis")
-        return guard("finish", "", "no valid decision from model; finishing with recorded evidence", "fallback")
+            return guard(
+                "document_analysis",
+                question,
+                "no valid decision from model; default to document analysis",
+            )
+        return guard(
+            "finish",
+            "",
+            "no valid decision from model; finishing with recorded evidence",
+            "fallback",
+        )
 
     action = _TOOL_TO_ACTION[call["name"]]
     task = str(call["args"].get("task") or call["args"].get("reason") or "").strip()
 
     # Guards that override model choices which would waste the budget or lose evidence.
     if action == "finish" and pending:
-        return guard("document_analysis", f"Analyse the newly fetched web sources {', '.join(pending)} for: {question}",
-                     "web sources were fetched but not analysed yet")
+        return guard(
+            "document_analysis",
+            f"Analyse the newly fetched web sources {', '.join(pending)} for: {question}",
+            "web sources were fetched but not analysed yet",
+        )
     if action == "finish" and not evidence and state.get("analysis_rounds", 0) == 0:
         return guard("document_analysis", question, "cannot finish before any document analysis")
 
@@ -231,7 +262,7 @@ def route_from_supervisor(state: ResearchState) -> str:
 
 
 def _worker_deadline(ws: Workspace) -> float:
-    return time.monotonic() + max(0.0, ws.time_left() - WRITER_RESERVE_S)
+    return time.monotonic() + max(0.0, ws.time_left() - ws.settings.writer_reserve_s)
 
 
 def web_researcher_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[str, Any]:
@@ -245,13 +276,22 @@ def web_researcher_node(state: ResearchState, runtime: Runtime[Workspace]) -> di
     )
     ws.tracer.emit("web_researcher", "node", "start", summary=truncate(task, 200))
     result = run_tool_loop(
-        ws.llm, web_tools(session), prompts.WEB_RESEARCHER, user,
-        agent="web_researcher", tracer=ws.tracer,
-        max_tool_calls=ws.settings.max_worker_tool_calls, deadline=_worker_deadline(ws),
+        ws.llm,
+        web_tools(session),
+        prompts.WEB_RESEARCHER,
+        user,
+        agent="web_researcher",
+        tracer=ws.tracer,
+        max_tool_calls=ws.settings.max_worker_tool_calls,
+        deadline=_worker_deadline(ws),
     )
     report = WorkerReport(
-        agent="web_researcher", task=task, summary=result.summary, tool_calls=result.tool_calls,
-        stop_reason=result.stop_reason, new_source_ids=list(session.new_sources),
+        agent="web_researcher",
+        task=task,
+        summary=result.summary,
+        tool_calls=result.tool_calls,
+        stop_reason=result.stop_reason,
+        new_source_ids=list(session.new_sources),
         errors=session.errors + result.errors,
     )
     update = session.state_update()
@@ -277,13 +317,22 @@ def document_analyst_node(state: ResearchState, runtime: Runtime[Workspace]) -> 
     )
     ws.tracer.emit("document_analyst", "node", "start", summary=truncate(task, 200))
     result = run_tool_loop(
-        ws.llm, analysis_tools(session), prompts.DOCUMENT_ANALYST, user,
-        agent="document_analyst", tracer=ws.tracer,
-        max_tool_calls=ws.settings.max_worker_tool_calls, deadline=_worker_deadline(ws),
+        ws.llm,
+        analysis_tools(session),
+        prompts.DOCUMENT_ANALYST,
+        user,
+        agent="document_analyst",
+        tracer=ws.tracer,
+        max_tool_calls=ws.settings.max_worker_tool_calls,
+        deadline=_worker_deadline(ws),
     )
     report = WorkerReport(
-        agent="document_analyst", task=task, summary=result.summary, tool_calls=result.tool_calls,
-        stop_reason=result.stop_reason, new_evidence_ids=[e.id for e in session.new_evidence],
+        agent="document_analyst",
+        task=task,
+        summary=result.summary,
+        tool_calls=result.tool_calls,
+        stop_reason=result.stop_reason,
+        new_evidence_ids=[e.id for e in session.new_evidence],
         errors=session.errors + result.errors,
     )
     update = session.state_update()
@@ -308,13 +357,21 @@ def single_agent_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict
     )
     ws.tracer.emit("single_agent", "node", "start", summary=truncate(state["question"], 200))
     result = run_tool_loop(
-        ws.llm, tools, prompts.SINGLE_AGENT, user,
-        agent="single_agent", tracer=ws.tracer,
-        max_tool_calls=ws.settings.max_single_agent_tool_calls, deadline=_worker_deadline(ws),
+        ws.llm,
+        tools,
+        prompts.SINGLE_AGENT,
+        user,
+        agent="single_agent",
+        tracer=ws.tracer,
+        max_tool_calls=ws.settings.max_single_agent_tool_calls,
+        deadline=_worker_deadline(ws),
     )
     report = WorkerReport(
-        agent="single_agent", task=state["question"], summary=result.summary,
-        tool_calls=result.tool_calls, stop_reason=result.stop_reason,
+        agent="single_agent",
+        task=state["question"],
+        summary=result.summary,
+        tool_calls=result.tool_calls,
+        stop_reason=result.stop_reason,
         new_source_ids=list(session.new_sources),
         new_evidence_ids=[e.id for e in session.new_evidence],
         errors=session.errors + result.errors,
@@ -369,7 +426,11 @@ def writer_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[str, 
         draft = call_llm(structured, [SystemMessage(prompts.WRITER), HumanMessage(user)], ws.tracer, "writer")
     except LLMError as exc:
         ws.tracer.emit("writer", "error", "writer_failed", summary=str(exc)[:200])
-        return {"draft": fallback_draft(evidence), "writer_status": "fallback", "errors": [f"writer: {exc}"]}
+        return {
+            "draft": fallback_draft(evidence),
+            "writer_status": "fallback",
+            "errors": [f"writer: {exc}"],
+        }
     return {"draft": draft, "writer_status": "ok"}
 
 
@@ -388,7 +449,9 @@ def _deterministic_limitations(state: ResearchState, ws: Workspace, cited_source
         notes.append(f"Research stopped early because of a run limit ({reason}).")
     for sid, src in state.get("sources", {}).items():
         if "possible_prompt_injection" in src.flags:
-            notes.append(f"Source {sid} contains text resembling instructions to an AI; it was treated as data only.")
+            notes.append(
+                f"Source {sid} contains text resembling instructions to an AI; it was treated as data only."
+            )
     if state.get("writer_status") == "fallback":
         notes.append("The writer model failed; findings are unsynthesised analyst notes.")
     return notes
@@ -416,7 +479,10 @@ def finalize_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[str
 
     if not evidence:
         status = "failed"
-    elif state.get("writer_status") != "ok" or state.get("stop_reason") in {"deadline", "llm_error"}:
+    elif state.get("writer_status") != "ok" or state.get("stop_reason") in {
+        "deadline",
+        "llm_error",
+    }:
         status = "partial"
     else:
         status = "completed"
@@ -447,7 +513,9 @@ def finalize_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[str
         ),
     )
     ws.tracer.emit(
-        "finalize", "node", "citation_check",
+        "finalize",
+        "node",
+        "citation_check",
         summary=f"{check.valid_citations}/{check.total_citations} citations valid; "
         f"{check.uncited_findings} uncited findings",
     )
@@ -468,8 +536,13 @@ def build_multi_agent_graph():
     g.add_node("finalize", finalize_node)
     g.add_edge(START, "supervisor")
     g.add_conditional_edges(
-        "supervisor", route_from_supervisor,
-        {"web_researcher": "web_researcher", "document_analyst": "document_analyst", "writer": "writer"},
+        "supervisor",
+        route_from_supervisor,
+        {
+            "web_researcher": "web_researcher",
+            "document_analyst": "document_analyst",
+            "writer": "writer",
+        },
     )
     g.add_edge("web_researcher", "supervisor")
     g.add_edge("document_analyst", "supervisor")

@@ -21,8 +21,50 @@ from .schemas import Passage
 
 _TOKEN = re.compile(r"[a-z0-9]+(?:[.'][a-z0-9]+)*")
 _STOPWORDS = frozenset(
-    "a an and are as at be by for from has have in is it its of on or that the this to was were "
-    "which with what when how does do shall may can under any such their they these those".split()
+    [
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "have",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "or",
+        "that",
+        "the",
+        "this",
+        "to",
+        "was",
+        "were",
+        "which",
+        "with",
+        "what",
+        "when",
+        "how",
+        "does",
+        "do",
+        "shall",
+        "may",
+        "can",
+        "under",
+        "any",
+        "such",
+        "their",
+        "they",
+        "these",
+        "those",
+    ]
 )
 RRF_K = 60
 

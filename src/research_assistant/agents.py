@@ -29,14 +29,21 @@ def call_llm(
         except Exception as exc:  # httpx/ollama errors, schema validation errors
             last_exc = exc
             tracer.emit(
-                agent, "error", "llm_error", duration_s=time.monotonic() - started,
+                agent,
+                "error",
+                "llm_error",
+                duration_s=time.monotonic() - started,
                 summary=f"attempt {attempt + 1}: {type(exc).__name__}: {str(exc)[:200]}",
             )
             continue
         usage = getattr(result, "usage_metadata", None) or {}
         tracer.emit(
-            agent, "llm", "llm_call", duration_s=time.monotonic() - started,
-            input_tokens=usage.get("input_tokens"), output_tokens=usage.get("output_tokens"),
+            agent,
+            "llm",
+            "llm_call",
+            duration_s=time.monotonic() - started,
+            input_tokens=usage.get("input_tokens"),
+            output_tokens=usage.get("output_tokens"),
         )
         return result
     raise LLMError(f"{type(last_exc).__name__}: {last_exc}")
@@ -109,7 +116,10 @@ def run_tool_loop(
                     content = f"ERROR: {type(exc).__name__}: {str(exc)[:300]}"
                     errors.append(content)
                     tracer.emit(
-                        agent, "error", call["name"], duration_s=time.monotonic() - started,
+                        agent,
+                        "error",
+                        call["name"],
+                        duration_s=time.monotonic() - started,
                         summary=content,
                     )
             messages.append(ToolMessage(content, tool_call_id=call["id"], name=call["name"]))

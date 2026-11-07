@@ -31,9 +31,7 @@ def inline_citations(text: str) -> list[str]:
     return ids
 
 
-def check_findings(
-    findings: list[DraftFinding], evidence: list[Evidence]
-) -> list[CheckedFinding]:
+def check_findings(findings: list[DraftFinding], evidence: list[Evidence]) -> list[CheckedFinding]:
     known = {e.id for e in evidence}
     checked = []
     for f in findings:
@@ -53,9 +51,7 @@ def check_findings(
     return checked
 
 
-def citation_check(
-    answer: str, findings: list[CheckedFinding], evidence: list[Evidence]
-) -> CitationCheck:
+def citation_check(answer: str, findings: list[CheckedFinding], evidence: list[Evidence]) -> CitationCheck:
     known = {e.id for e in evidence}
     answer_ids = inline_citations(answer)
     all_ids = list(answer_ids)

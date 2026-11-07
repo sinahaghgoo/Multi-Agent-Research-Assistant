@@ -45,6 +45,7 @@ class Settings:
     max_evidence: int = 16
     search_top_k: int = 5
     run_timeout_s: float = 900.0
+    writer_reserve_s: float = 120.0  # time kept aside at the end for the report writer
 
     # Paths
     data_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "data")
@@ -76,9 +77,7 @@ class Settings:
             search_region=_env("RA_SEARCH_REGION", d.search_region),
             http_timeout_s=float(_env("RA_HTTP_TIMEOUT_S", str(d.http_timeout_s))),
             max_supervisor_turns=int(_env("RA_MAX_SUPERVISOR_TURNS", str(d.max_supervisor_turns))),
-            max_worker_tool_calls=int(
-                _env("RA_MAX_WORKER_TOOL_CALLS", str(d.max_worker_tool_calls))
-            ),
+            max_worker_tool_calls=int(_env("RA_MAX_WORKER_TOOL_CALLS", str(d.max_worker_tool_calls))),
             max_single_agent_tool_calls=int(
                 _env("RA_MAX_SINGLE_AGENT_TOOL_CALLS", str(d.max_single_agent_tool_calls))
             ),

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -39,11 +38,15 @@ def report_to_markdown(report: Report, *, include_quotes: bool = True) -> str:
         "## Key findings",
         "",
     ]
-    lines += [_finding_line(f.statement, f.evidence_ids, f.invalid_evidence_ids) for f in report.key_findings] or ["_None._"]
+    lines += [
+        _finding_line(f.statement, f.evidence_ids, f.invalid_evidence_ids) for f in report.key_findings
+    ] or ["_None._"]
 
     if report.conflicts:
         lines += ["", "## Conflicting or time-sensitive evidence", ""]
-        lines += [_finding_line(f.statement, f.evidence_ids, f.invalid_evidence_ids) for f in report.conflicts]
+        lines += [
+            _finding_line(f.statement, f.evidence_ids, f.invalid_evidence_ids) for f in report.conflicts
+        ]
 
     lines += ["", "## Limitations and open questions", ""]
     lines += [f"- {x}" for x in report.limitations] or ["- None stated."]
@@ -101,25 +104,28 @@ def report_to_markdown(report: Report, *, include_quotes: bool = True) -> str:
 
 
 def trace_to_markdown(events: list[TraceEvent]) -> str:
-    lines = ["# Execution trace", "", "| # | t (s) | agent | kind | name | detail |", "|--|--|--|--|--|--|"]
+    lines = [
+        "# Execution trace",
+        "",
+        "| # | t (s) | agent | kind | name | detail |",
+        "|--|--|--|--|--|--|",
+    ]
     for e in events:
         detail = e.detail.get("summary") or e.detail.get("args") or ""
         detail = str(detail).replace("|", "\\|").replace("\n", " ")
         dur = f" · {e.duration_s:.1f}s" if e.duration_s else ""
-        lines.append(f"| {e.seq} | {e.t:.1f} | {e.agent} | {e.kind} | {e.name}{dur} | {truncate(detail, 160)} |")
+        lines.append(
+            f"| {e.seq} | {e.t:.1f} | {e.agent} | {e.kind} | {e.name}{dur} | {truncate(detail, 160)} |"
+        )
     return "\n".join(lines) + "\n"
 
 
-def save_run(
-    report: Report, events: list[TraceEvent], runs_dir: Path, slug: str = "run"
-) -> Path:
+def save_run(report: Report, events: list[TraceEvent], runs_dir: Path, slug: str = "run") -> Path:
     stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     out = runs_dir / f"{stamp}-{report.run.mode}-{slug}"
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.md").write_text(report_to_markdown(report), encoding="utf-8")
     (out / "report.json").write_text(report.model_dump_json(indent=2), encoding="utf-8")
     (out / "trace.md").write_text(trace_to_markdown(events), encoding="utf-8")
-    (out / "trace.jsonl").write_text(
-        "\n".join(e.model_dump_json() for e in events), encoding="utf-8"
-    )
+    (out / "trace.jsonl").write_text("\n".join(e.model_dump_json() for e in events), encoding="utf-8")
     return out

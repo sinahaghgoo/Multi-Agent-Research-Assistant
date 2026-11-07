@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import time
 from collections.abc import Callable
 from typing import Any, Literal
@@ -61,8 +62,7 @@ class Tracer:
         )
         self.events.append(event)
         if self.listener is not None:
-            try:
+            # A UI callback must never break the run.
+            with contextlib.suppress(Exception):
                 self.listener(event)
-            except Exception:  # a UI callback must never break the run
-                pass
         return event
