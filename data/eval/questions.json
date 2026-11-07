@@ -1,0 +1,44 @@
+{
+  "description": "Evaluation set for the local AI-governance corpus. Expected sources and findings were grounded by hand against the committed passages (see notebook 'Evaluation'). Offline questions are answerable from the local corpus alone; they are the default eval to keep results reproducible without live web search.",
+  "questions": [
+    {
+      "id": "gpai-obligations",
+      "question": "What transparency and documentation obligations does the EU AI Act place on providers of general-purpose AI models?",
+      "needs_web": false,
+      "expected_sources": ["eu-ai-act"],
+      "expected_locations": ["Article 53"],
+      "expected_findings": [
+        {"label": "Keep technical documentation of the model", "all_of": ["technical documentation"]},
+        {"label": "Provide information/documentation to downstream providers", "all_of": ["information"], "any_of": ["downstream", "providers", "integrate"]},
+        {"label": "Put in place a copyright policy", "all_of": ["copyright"]},
+        {"label": "Publish a summary of training content", "all_of": ["summary"], "any_of": ["training content", "training data", "content used"]}
+      ]
+    },
+    {
+      "id": "rmf-vs-act-risk",
+      "question": "How does the EU AI Act's risk-based approach compare with the risk management approach in the NIST AI Risk Management Framework?",
+      "needs_web": false,
+      "expected_sources": ["eu-ai-act", "nist-ai-rmf"],
+      "expected_locations": [],
+      "expected_findings": [
+        {"label": "EU Act tiers AI by risk (prohibited / high-risk)", "any_of": ["prohibit", "high-risk", "high risk", "unacceptable"]},
+        {"label": "NIST organises work into govern, map, measure, manage", "all_of": ["govern", "map", "measure", "manage"]},
+        {"label": "NIST framework is voluntary", "any_of": ["voluntary"]},
+        {"label": "EU Act imposes binding legal obligations", "any_of": ["obligation", "binding", "legal", "regulation"]}
+      ]
+    },
+    {
+      "id": "genai-risks",
+      "question": "What risks are specific to generative AI according to NIST, and which part of the EU AI Act is most relevant to governing such models?",
+      "needs_web": false,
+      "expected_sources": ["nist-ai-600-1", "eu-ai-act"],
+      "expected_locations": [],
+      "expected_findings": [
+        {"label": "Confabulation (hallucination) risk", "any_of": ["confabulation", "hallucinat"]},
+        {"label": "CBRN information or capabilities risk", "any_of": ["cbrn", "chemical", "biological"]},
+        {"label": "Data privacy risk", "any_of": ["data privacy", "privacy", "personally identifiable"]},
+        {"label": "EU AI Act GPAI / general-purpose model provisions are relevant", "any_of": ["general-purpose", "general purpose", "gpai"]}
+      ]
+    }
+  ]
+}

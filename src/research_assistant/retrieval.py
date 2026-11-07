@@ -13,7 +13,7 @@ import re
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -103,6 +103,7 @@ class BM25:
         return scores
 
 
+@runtime_checkable
 class Embedder(Protocol):
     name: str
 
@@ -112,16 +113,22 @@ class Embedder(Protocol):
 
 
 class OllamaEmbedder:
-    """Wraps langchain-ollama embeddings and applies the model's query/document prefixes."""
+    """Embeds via Ollama's native batch ``/api/embed`` endpoint, applying the model's
+    query/document instruction prefixes.
+
+    Batching the whole corpus in a few requests (rather than one call per passage) cuts the
+    first-time index build from ~90s to a few seconds; embeddings are then cached on disk.
+    """
 
     QUERY_TASK = "Given a research question, retrieve document passages that help answer it"
 
-    def __init__(self, model: str, base_url: str, batch_size: int = 32) -> None:
-        from langchain_ollama import OllamaEmbeddings
+    def __init__(self, model: str, base_url: str, batch_size: int = 128, timeout_s: float = 120.0) -> None:
+        import httpx
 
         self.name = model
+        self.base_url = base_url.rstrip("/")
         self.batch_size = batch_size
-        self._client = OllamaEmbeddings(model=model, base_url=base_url)
+        self._client = httpx.Client(timeout=timeout_s)
 
     def _query_prefix(self) -> str:
         if "qwen3-embedding" in self.name:
@@ -133,15 +140,25 @@ class OllamaEmbedder:
     def _doc_prefix(self) -> str:
         return "search_document: " if "nomic-embed" in self.name else ""
 
+    def _embed(self, inputs: list[str]) -> list[list[float]]:
+        response = self._client.post(f"{self.base_url}/api/embed", json={"model": self.name, "input": inputs})
+        response.raise_for_status()
+        embeddings = response.json().get("embeddings")
+        if not embeddings or len(embeddings) != len(inputs):
+            raise RuntimeError(
+                f"embedding endpoint returned {len(embeddings or [])} of {len(inputs)} vectors"
+            )
+        return embeddings
+
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
-        out: list[list[float]] = []
         prefix = self._doc_prefix()
+        out: list[list[float]] = []
         for i in range(0, len(texts), self.batch_size):
-            out.extend(self._client.embed_documents([prefix + t for t in texts[i : i + self.batch_size]]))
+            out.extend(self._embed([prefix + t for t in texts[i : i + self.batch_size]]))
         return out
 
     def embed_query(self, text: str) -> list[float]:
-        return self._client.embed_query(self._query_prefix() + text)
+        return self._embed([self._query_prefix() + text])[0]
 
 
 def _normalise(matrix: np.ndarray) -> np.ndarray:
