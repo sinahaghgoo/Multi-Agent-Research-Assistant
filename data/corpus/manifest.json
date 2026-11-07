@@ -1,0 +1,53 @@
+{
+  "description": "Local example corpus on AI governance. Raw files are downloaded by scripts/prepare_corpus.py into data/corpus/raw/ (not committed); the extracted passages in data/corpus/passages.jsonl are committed so the demo works offline.",
+  "sources": [
+    {
+      "id": "eu-ai-act",
+      "title": "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act)",
+      "short_title": "EU AI Act",
+      "publisher": "European Parliament and Council of the European Union (Official Journal of the EU, L series, 12 July 2024)",
+      "published": "2024-07-12",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202401689",
+      "canonical_url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "format": "eurlex_html",
+      "raw_file": "eu_ai_act.html",
+      "sha256": "0c617e4f53463df1944025f9a72b5ee8e06041fee376dd8629a8bf500f129e0b",
+      "retrieved": "2026-11-07",
+      "license": "EUR-Lex legal notice: legal documents published in EUR-Lex may be re-used for commercial or non-commercial purposes (Commission Decision 2011/833/EU). Only the Official Journal version is authentic. © European Union, https://eur-lex.europa.eu",
+      "license_url": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+      "notes": "Original 2024 text as published in the Official Journal; later amendments are not included."
+    },
+    {
+      "id": "nist-ai-rmf",
+      "title": "Artificial Intelligence Risk Management Framework (AI RMF 1.0), NIST AI 100-1",
+      "short_title": "NIST AI RMF 1.0",
+      "publisher": "National Institute of Standards and Technology (NIST), U.S. Department of Commerce",
+      "published": "2023-01-26",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+      "canonical_url": "https://doi.org/10.6028/NIST.AI.100-1",
+      "format": "pdf",
+      "raw_file": "NIST.AI.100-1.pdf",
+      "sha256": "7576edb531d9848825814ee88e28b1795d3a84b435b4b797d3670eafdc4a89f1",
+      "retrieved": "2026-11-07",
+      "license": "Work of the U.S. Government. NIST states that information on its sites, except material marked as copyrighted, is public information and may be distributed or copied; credit is requested.",
+      "license_url": "https://www.nist.gov/oism/copyrights",
+      "notes": "NIST states the AI RMF 1.0 is being revised; this corpus uses the January 2023 version."
+    },
+    {
+      "id": "nist-ai-600-1",
+      "title": "Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile, NIST AI 600-1",
+      "short_title": "NIST GenAI Profile",
+      "publisher": "National Institute of Standards and Technology (NIST), U.S. Department of Commerce",
+      "published": "2024-07-26",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf",
+      "canonical_url": "https://doi.org/10.6028/NIST.AI.600-1",
+      "format": "pdf",
+      "raw_file": "NIST.AI.600-1.pdf",
+      "sha256": "6e73620ab6b64e90ef2c04bf0e0d6246185a2f4b1b13cab0df494496cff89b6a",
+      "retrieved": "2026-11-07",
+      "license": "Work of the U.S. Government. NIST states that information on its sites, except material marked as copyrighted, is public information and may be distributed or copied; credit is requested.",
+      "license_url": "https://www.nist.gov/oism/copyrights",
+      "notes": ""
+    }
+  ]
+}

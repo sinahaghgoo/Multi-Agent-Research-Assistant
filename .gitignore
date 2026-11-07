@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Environments (.venv and secrets)
+.venv/
+.env
+
+# uv.lock IS committed for reproducibility.
+
+# Re-downloadable corpus originals (see data/corpus/manifest.json).
+# The extracted passages in data/corpus/passages.jsonl are committed instead.
+data/corpus/raw/
+
+# Embedding cache
+.cache/
+
+# Generated run artifacts
+runs/*
+!runs/.gitkeep
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/
