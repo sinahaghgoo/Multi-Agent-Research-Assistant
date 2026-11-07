@@ -1,0 +1,73 @@
+question_id,finding,evidence_ids,evidence_quotes,grounding_proxy,supported
+gpai-obligations,"Providers must prepare and keep up-to-date technical documentation of the model, including training and testing processes and evaluation results.",E1; E2,"[E1] Recital 101: (101) Providers of general-purpose AI models have a particular role and responsibility along the AI value chain, as the models they provide may form the basis for a range of downstream systems, often provided by downstream providers that necessitate a good understanding of the models and their capab | [E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.8,
+gpai-obligations,Technical documentation must be made available upon request to the AI Office and national competent authorities.,E1; E2,"[E1] Recital 101: (101) Providers of general-purpose AI models have a particular role and responsibility along the AI value chain, as the models they provide may form the basis for a range of downstream systems, often provided by downstream providers that necessitate a good understanding of the models and their capab | [E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.25,
+gpai-obligations,"Providers must draw up, keep up-to-date, and make available information and documentation to downstream providers who intend to integrate the model into their systems.",E2,"[E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.471,
+gpai-obligations,Information provided to downstream providers must enable them to understand the model's capabilities and limitations and comply with obligations under the Regulation.,E2,"[E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.143,
+gpai-obligations,"Providers must draw up and make publicly available a sufficiently detailed summary about the content used for training the model, according to a template provided by the AI Office.",E3,"[E3] Article 53 (Obligations for providers of general-purpose AI models): (d) draw up and make publicly available a sufficiently detailed summary about the content used for training of the general-purpose AI model, according to a template provided by the AI Office.
+2. The obligations set out in paragraph 1, points (a) and (b), shall not apply to providers of AI models tha",0.95,
+gpai-obligations,"Obligations regarding technical documentation (paragraph 1, points (a) and (b)) do not apply to models released under free and open-source licenses where parameters and architecture are publicly available, except for models with systemic risks.",E3,"[E3] Article 53 (Obligations for providers of general-purpose AI models): (d) draw up and make publicly available a sufficiently detailed summary about the content used for training of the general-purpose AI model, according to a template provided by the AI Office.
+2. The obligations set out in paragraph 1, points (a) and (b), shall not apply to providers of AI models tha",0.417,
+rmf-vs-act-risk,The NIST AI RMF defines risk as a composite measure of an event's probability of occurring and the magnitude or degree of its consequences.,E3,"[E3] PDF page 9: Part 1: Foundational Information
+1. Framing Risk
+AI risk management offers a path to minimize potential negative impacts of AI systems,
+such as threats to civil liberties and rights, while also providing opportunities to maximize
+positive impacts. Addressing, documenting, and managing AI risks and p",0.154,
+rmf-vs-act-risk,"The NIST AI RMF Core comprises four functions: GOVERN, MAP, MEASURE, and MANAGE, with GOVERN applying to all stages while the other three can be applied in system-specific contexts.",E1; E2,"[E1] PDF page 8: valid and reliable, safe, secure and resilient, accountable and transparent, explainable and
+interpretable, privacy enhanced, and fair with their harmful biases managed.
+Part 2 comprises the “Core” of the Framework. It describes four specific functions to help
+organizations address the risks of AI s | [E2] PDF page 25: Part 2: Core and Profiles
+5. AI RMF Core
+The AI RMF Core provides outcomes and actions that enable dialogue, understanding, and
+activities to manage AI risks and responsibly develop trustworthy AI systems. As illustrated in Figure 5, the Core is composed of four functions: GOVERN , MAP, MEASURE ,
+an",0.524,
+rmf-vs-act-risk,"Risk management under the NIST framework is designed to be continuous, timely, and performed throughout the AI system lifecycle dimensions.",E2,"[E2] PDF page 25: Part 2: Core and Profiles
+5. AI RMF Core
+The AI RMF Core provides outcomes and actions that enable dialogue, understanding, and
+activities to manage AI risks and responsibly develop trustworthy AI systems. As illustrated in Figure 5, the Core is composed of four functions: GOVERN , MAP, MEASURE ,
+an",0.077,
+rmf-vs-act-risk,The framework aims to minimize anticipated negative impacts of AI systems while also identifying opportunities to maximize positive impacts.,E4,"[E4] PDF page 9: While risk management processes generally address negative impacts, this Framework offers approaches to minimize anticipated negative impacts of AI systems and identify opportunities to maximize positive impacts. Effectively managing the risk of potential harms
+could lead to more trustworthy AI syst",0.786,
+genai-risks,"NIST categorizes generative AI risks into technical/model risks (confabulation, harmful bias, homogenization), misuse by humans (CBRN information, data privacy, information integrity), and ecosystem/societal risks (environmental, intellectual property).",E4,"[E4] PDF page 7: 5 These risks can be further categorized by organizations depending on their unique approaches to risk definition
+and management. One possible way to further categorize these risks, derived in part from the UK’s International
+Scientific Report on the Safety of Advanced AI, could be: 1 ) Technical / ",0.125,
+genai-risks,"NIST notes that generative AI risks are novel or exacerbated compared to traditional software, including issues with data representation and ground truth availability.",E3,"[E3] PDF page 43: Appendix B:
+How AI Risks Differ from Traditional Software Risks
+As with traditional software, risks from AI-based technology can be bigger than an enterprise, span organizations, and lead to societal impacts. AI systems also bring a set of
+risks that are not comprehensively addressed by current risk",0.235,
+genai-risks,"Article 55 of the EU AI Act specifies obligations for providers of general-purpose AI models with systemic risk, including model evaluation, assessment/mitigation of systemic risks, incident reporting, and cybersecurity protection.",E6,"[E6] Article 55 (Obligations of providers of general-purpose AI models with systemic risk): 1. In addition to the obligations listed in Articles 53 and 54, providers of general-purpose AI models with systemic risk shall:
+(a) perform model evaluation in accordance with standardised protocols and tools reflecting the state of the art, including conducting and documenting adversarial testing ",0.478,
+gpai-obligations,"Providers of general-purpose AI models must draw up and keep up-to-date technical documentation containing information on the model's training, testing, and evaluation processes.",E1; E2,"[E1] Recital 101: (101) Providers of general-purpose AI models have a particular role and responsibility along the AI value chain, as the models they provide may form the basis for a range of downstream systems, often provided by downstream providers that necessitate a good understanding of the models and their capab | [E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.789,
+gpai-obligations,"Providers must provide information and documentation to downstream providers who intend to integrate the model into their systems, ensuring these providers understand the model's capabilities and limitations while respecting intellectual property rights.",E2,"[E2] Article 53 (Obligations for providers of general-purpose AI models): 1. Providers of general-purpose AI models shall:
+(a) draw up and keep up-to-date the technical documentation of the model, including its training and testing process and the results of its evaluation, which shall contain, at a minimum, the information set out in Annex XI for the purpose of providing",0.182,
+gpai-obligations,Providers releasing models under free and open-source licenses with publicly available parameters may be exempt from certain transparency requirements unless the model presents a systemic risk.,E3,"[E3] Recital 104: (104) The providers of general-purpose AI models that are released under a free and open-source licence, and whose parameters, including the weights, the information on the model architecture, and the information on model usage, are made publicly available should be subject to exceptions as regards ",0.474,
+rmf-vs-act-risk,The EU AI Act explicitly adopts a risk-based approach that tailors rules to the intensity and scope of risks.,E1,"[E1] Recital 26: (26) In order to introduce a proportionate and effective set of binding rules for AI systems, a clearly defined risk-based approach should be followed. That approach should tailor the type and content of such rules to the intensity and scope of the risks that AI systems can generate. It is therefore",0.615,
+rmf-vs-act-risk,"The EU AI Act prohibits unacceptable practices, lays down requirements for high-risk systems, and establishes transparency obligations.",E1,"[E1] Recital 26: (26) In order to introduce a proportionate and effective set of binding rules for AI systems, a clearly defined risk-based approach should be followed. That approach should tailor the type and content of such rules to the intensity and scope of the risks that AI systems can generate. It is therefore",0.2,
+rmf-vs-act-risk,"The NIST AI RMF Core consists of four functions—GOVERN, MAP, MEASURE, and MANAGE—that organize AI risk management activities at the highest level.",E3,"[E3] PDF page 25: Part 2: Core and Profiles
+5. AI RMF Core
+The AI RMF Core provides outcomes and actions that enable dialogue, understanding, and
+activities to manage AI risks and responsibly develop trustworthy AI systems. As illustrated in Figure 5, the Core is composed of four functions: GOVERN , MAP, MEASURE ,
+an",0.588,
+rmf-vs-act-risk,"The MAP function enables organizations to identify risks and broader contributing factors, providing contextual knowledge about AI system impacts.",E4,"[E4] PDF page 30: • enabling recognition of when systems are not functional within or out of their intended context;
+• identifying positive and beneficial uses of their existing AI systems;
+• improving understanding of limitations in AI and ML processes;
+• identifying constraints in real-world applications that may l",0.062,
+rmf-vs-act-risk,"The MEASURE function employs quantitative, qualitative, or mixed-method tools to analyze, assess, benchmark, and monitor AI risk and related impacts.",E5,"[E5] PDF page 33: Table 2: Categories and subcategories for the MAP function. (Continued)
+MAP 5.2: Practices and personnel for supporting regular engagement with relevant AI actors and integrating feedback about
+positive, negative, and unanticipated impacts are in place and
+documented.
+Categories Subcategories
+5.3 Me",0.188,
+rmf-vs-act-risk,"The MANAGE function prioritizes, responds to, and manages AI risks based on assessments from the MAP and MEASURE functions.",E6,"[E6] PDF page 37: Practices related to managing AI risks are described in the NIST AI RMF Playbook. Table
+4 lists the MANAGE function’s categories and subcategories.
+Table 4: Categories and subcategories for the MANAGE function.
+MANAGE 1: AI
+risks based on
+assessments and
+other analytical
+output from the
+MAP and MEAS",0.583,

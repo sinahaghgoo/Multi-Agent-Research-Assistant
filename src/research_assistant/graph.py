@@ -363,16 +363,32 @@ def single_agent_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict
         f"Web tools: {'available' if ws.search is not None else 'disabled for this run'}"
     )
     ws.tracer.emit("single_agent", "node", "start", summary=truncate(state["question"], 200))
-    result = run_tool_loop(
-        ws.llm,
-        tools,
-        prompts.SINGLE_AGENT,
-        user,
-        agent="single_agent",
-        tracer=ws.tracer,
-        max_tool_calls=ws.settings.max_single_agent_tool_calls,
-        deadline=_worker_deadline(ws),
-    )
+    # Mirror the supervisor's empty-evidence guard so the baseline is a fair comparison:
+    # if the agent finishes without recording evidence, re-prompt it (bounded) to record.
+    deadline = _worker_deadline(ws)
+    total_calls = 0
+    for attempt in range(MAX_EMPTY_ANALYSIS_RETRIES):
+        prompt = user if attempt == 0 else (
+            f"{user}\n\nYou have recorded no evidence yet. You MUST call record_evidence on the "
+            "relevant passages you find — searching alone does not record evidence."
+        )
+        result = run_tool_loop(
+            ws.llm,
+            tools,
+            prompts.SINGLE_AGENT,
+            prompt,
+            agent="single_agent",
+            tracer=ws.tracer,
+            max_tool_calls=ws.settings.max_single_agent_tool_calls,
+            deadline=deadline,
+        )
+        total_calls += result.tool_calls
+        if session.evidence or result.stop_reason in {"deadline", "llm_error"}:
+            break
+        ws.tracer.emit(
+            "single_agent", "guard", "retry_no_evidence", summary=f"attempt {attempt + 1} recorded nothing"
+        )
+    result.tool_calls = total_calls
     report = WorkerReport(
         agent="single_agent",
         task=state["question"],

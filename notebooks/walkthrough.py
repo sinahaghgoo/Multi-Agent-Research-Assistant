@@ -162,52 +162,55 @@ Markdown(report_to_markdown(out.report))
 # claim is *truly supported* is left to a human review step (shown at the end). The model scoring its
 # own output is not treated as validation.
 
-# %%
-from research_assistant.evaluation import aggregate, evaluate_report, load_eval_questions
-
-questions = [q for q in load_eval_questions(settings.data_dir / "eval" / "questions.json") if not q.needs_web]
-print(f"Evaluating {len(questions)} offline questions on both modes "
-      f"(this calls the local model several times)…\n")
-
-results = []
-for mode in ("multi_agent", "single_agent"):
-    for q in questions:
-        r = evaluate_report(assistant.run(q.question, mode=mode).report, q)
-        results.append(r)
-        print(f"  [{mode:13s}] {q.id:18s} status={r.status:9s} coverage={r.finding_coverage:.0%} "
-              f"citations={r.citation_validity:.0%} evidence={r.n_evidence} {r.duration_s:.0f}s")
+# %% [markdown]
+# The full 3-question × 2-mode sweep takes several minutes, so it is run once via
+# `scripts/run_evaluation.py` and the results are committed to `data/eval/results-latest.json`.
+# We **load** those results here for the aggregate comparison, then run one **live** single-agent
+# pass below so this notebook still exercises the baseline on the real model.
 
 # %%
-summary = pd.DataFrame(
-    {"mode": m, **aggregate([r for r in results if r.mode == m])}
-    for m in ("multi_agent", "single_agent")
-).set_index("mode")
-summary.T
+eval_results = json.loads((settings.data_dir / "eval" / "results-latest.json").read_text())
+print(f"Loaded evaluation: model={eval_results['model']}, web={eval_results['web_enabled']}")
+summary = pd.DataFrame(eval_results["per_mode_aggregate"]).T
+summary[["completion_rate", "mean_citation_validity", "mean_finding_coverage",
+         "mean_grounding_proxy", "mean_duration_s", "mean_llm_calls"]]
 
 # %% [markdown]
-# **Reading the comparison.** Compare `mean_finding_coverage`, `mean_citation_validity` and
-# `mean_grounding_proxy` (quality) against `mean_duration_s`, `mean_llm_calls` and `mean_tool_calls`
-# (cost). The multi-agent workflow typically covers multi-part questions more completely by splitting
-# the work, at the cost of more LLM calls; for simple single-document lookups the single agent is
-# competitive and cheaper — multiple agents then add overhead without improving the answer.
+# **Reading the comparison.** The multi-agent workflow completed and validly cited *all* questions;
+# the single-agent baseline (same tools, same empty-evidence safeguard) completed fewer and covered
+# less on average. But it is not uniformly worse — on the EU-vs-NIST comparison question the single
+# agent actually covered more — so the win is **reliability and source breadth**, at the cost of more
+# LLM calls. Small-n on a local 9B model: directional, not a benchmark.
+
+# %% [markdown]
+# ### Live single-agent run (same question as Section 3)
+# One agent with the same tools and budget. Compare its evidence and citations to the multi-agent run.
+
+# %%
+single = assistant.run(question, mode="single_agent")
+sr = single.report
+print(f"single-agent: status={sr.run.status} · {sr.run.duration_s:.0f}s · {sr.run.llm_calls} LLM calls · "
+      f"{len(sr.evidence)} evidence · citations {sr.citation_check.valid_citations}/"
+      f"{sr.citation_check.total_citations} valid")
 
 # %% [markdown]
 # ### Manual claim-support review (the honest check)
-# Automated validity only proves a citation *resolves*. To check whether evidence *supports* a claim,
-# a human fills the `supported` column below. We show the rows for the first question.
+# Automated validity only proves a citation *resolves*. Whether evidence *supports* a claim is for a
+# human to judge — `scripts/run_evaluation.py --manual` writes one row per finding to a CSV with the
+# `supported` column left blank. Here are the rows for the multi-agent showcase run, with the lexical
+# grounding proxy as a hint (not a verdict).
 
 # %%
 from research_assistant.evaluation import manual_review_rows
 
-detailed = assistant.run(questions[0].question, mode="multi_agent").report
 review_df = pd.DataFrame(
     {
         "finding": row.finding[:70],
         "evidence": "; ".join(row.evidence_ids),
         "grounding_proxy": row.grounding_proxy,
-        "supported (fill in)": row.supported or "?",
+        "supported (human fills in)": row.supported or "?",
     }
-    for row in manual_review_rows(detailed, questions[0].id)
+    for row in manual_review_rows(out.report, "gpai-obligations")
 )
 review_df
 

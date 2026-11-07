@@ -201,15 +201,38 @@ and tool calls. **Manual:** a generated CSV where a human marks whether each sam
 supported by its evidence — the honest claim-support check. The same model scoring its own output
 is **not** presented as independent validation.
 
-> Measured results and the multi-agent-vs-single-agent comparison are in
-> `notebooks/walkthrough.ipynb` and committed under `runs/eval/`. _(This section is updated with
-> each evaluation run; numbers are reproducible with the command above.)_
+### Measured results
 
-### Single-agent baseline
+Run on the 3 offline questions, `qwen3.5:9b`, web disabled (Apple M3 Pro, 18 GB). Full results:
+[`data/eval/results-latest.json`](data/eval/results-latest.json); reproducible with the command
+above.
 
-The same tools and a comparable total tool budget are given to **one** agent (`--mode single_agent`).
-The comparison shows where a supervisor helps (focused sub-tasks, cleaner evidence) and where it
-adds overhead without improving the result — reported honestly rather than assumed.
+| Metric (mean) | Multi-agent | Single-agent |
+|---|---:|---:|
+| Completion rate | **1.00** (3/3) | 0.67 (2/3) |
+| Citation validity | **1.00** | 0.67 |
+| Answer has citations | **1.00** | 0.67 |
+| Expected-source recall | 0.83 | 0.67 |
+| Expected-finding coverage | **0.67** | 0.42 |
+| Grounding proxy (lexical) | **0.77** | 0.49 |
+| Duration (s) | 201 | 186 |
+| LLM calls | 16.7 | 12.3 |
+
+**What the comparison actually shows.** The multi-agent workflow completed and validly cited **all**
+questions; the single-agent baseline (given the *same* tools and an equivalent empty-evidence
+safeguard) completed 2 of 3 — it failed to record any evidence on the generative-AI-risks question.
+But it is **not** uniformly worse: on the EU-vs-NIST comparison question the single agent reached
+higher finding-coverage (0.75) than the multi-agent run (0.25), which spent 399 s and still
+under-covered. So multiple agents buy **reliability and source breadth** here, at the cost of more
+LLM calls and latency; for a focused single-document lookup the single agent is competitive and
+cheaper. These are small-n results on a local 9B model — directional, not a benchmark.
+
+> **Validity vs. support.** The table's citation validity is automated and deterministic. Whether
+> each claim is *supported* by its evidence is checked by a human via
+> [`data/eval/manual-review-template.csv`](data/eval/manual-review-template.csv) (one row per cited
+> finding, with the lexical grounding proxy as a hint). During development I spot-checked the
+> multi-agent GPAI run against the EU AI Act text and each cited passage supported its finding; that
+> is a developer check, not an automated guarantee.
 
 ---
 

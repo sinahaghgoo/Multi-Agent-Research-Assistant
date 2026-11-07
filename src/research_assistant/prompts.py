@@ -48,10 +48,11 @@ Tools:
   passages that directly support an answer. Use the exact passage ID in square brackets.
 - web_search / fetch_page (if available): find and fetch public web pages for recent or missing
   information; fetched pages become searchable with search_documents.
-Only recorded evidence can be cited later. Record at most 10 passages. Notes must state in one
-sentence what the passage itself says.
+Only recorded evidence can be cited later, so searching is not enough: after each search, call
+record_evidence for the relevant passages (exact ID in square brackets) before you finish. Record at
+most 10 passages. Notes must state in one sentence what the passage itself says.
 - {UNTRUSTED_RULE}
-When the evidence covers the question, reply with a 2-4 sentence summary of what you found."""
+Once you have recorded the relevant evidence, reply with a 2-4 sentence summary of what you found."""
 
 WRITER = f"""You write a research report strictly from the numbered evidence provided.
 - Use only facts stated in the evidence text. Do not add outside knowledge.
