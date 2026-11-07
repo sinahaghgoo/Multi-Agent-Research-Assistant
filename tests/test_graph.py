@@ -109,6 +109,31 @@ def test_supervisor_cannot_finish_before_any_analysis(settings, mini_index, mini
     assert update["next_action"] == "document_analysis"
 
 
+def test_supervisor_retries_analysis_when_no_evidence_recorded(settings, mini_index, mini_sources):
+    # An analysis round ran but recorded nothing; finishing would produce an empty report.
+    model = ScriptedChatModel(responses=[ai(tool_calls=[ToolCall("finish_research", {"reason": "covered"})])])
+    ws = make_workspace(settings, llm=model, index=mini_index, search=None)
+    state = _initial_state(mini_sources)
+    state["turn"] = 2
+    state["analysis_rounds"] = 1  # already analysed once, but no evidence
+    update = supervisor_node(state, _runtime(ws))
+    assert update["next_action"] == "document_analysis"
+    assert update["decisions"][0].decided_by == "guard"
+
+
+def test_supervisor_allows_empty_finish_after_retry_budget(settings, mini_index, mini_sources):
+    # After the retry budget is spent, a 0-evidence finish is allowed (graceful failure).
+    model = ScriptedChatModel(
+        responses=[ai(tool_calls=[ToolCall("finish_research", {"reason": "nothing found"})])]
+    )
+    ws = make_workspace(settings, llm=model, index=mini_index, search=None)
+    state = _initial_state(mini_sources)
+    state["turn"] = 3
+    state["analysis_rounds"] = 2  # retry budget spent
+    update = supervisor_node(state, _runtime(ws))
+    assert update["next_action"] == "finish"
+
+
 def test_supervisor_falls_back_when_model_gives_no_tool_call(settings, mini_index, mini_sources):
     model = ScriptedChatModel(responses=[ai(content="I think we should stop."), ai(content="still no tool")])
     ws = make_workspace(settings, llm=model, index=mini_index, search=None)

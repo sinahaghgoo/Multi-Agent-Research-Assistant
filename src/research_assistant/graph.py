@@ -40,6 +40,7 @@ from .tools import ToolSession, Workspace, analysis_tools, web_tools
 from .validation import check_findings, citation_check, strip_invalid_inline
 
 MAX_WEB_ROUNDS = 2
+MAX_EMPTY_ANALYSIS_RETRIES = 2  # force re-analysis if a round records no evidence
 
 
 def merge_dicts(left: dict, right: dict) -> dict:
@@ -240,8 +241,14 @@ def supervisor_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[s
             f"Analyse the newly fetched web sources {', '.join(pending)} for: {question}",
             "web sources were fetched but not analysed yet",
         )
-    if action == "finish" and not evidence and state.get("analysis_rounds", 0) == 0:
-        return guard("document_analysis", question, "cannot finish before any document analysis")
+    if action == "finish" and not evidence and state.get("analysis_rounds", 0) < MAX_EMPTY_ANALYSIS_RETRIES:
+        return guard(
+            "document_analysis",
+            f"No evidence has been recorded yet, so the question cannot be answered. Search the "
+            f"documents for: {question}. You MUST call record_evidence on the most relevant "
+            f"passages — searching alone does not record evidence.",
+            "no evidence recorded yet; retrying document analysis",
+        )
 
     tracer.emit("supervisor", "decision", action, summary=truncate(task, 200))
     update = _decision(state, action, task if action != "finish" else "", task, "model")
@@ -421,17 +428,33 @@ def writer_node(state: ResearchState, runtime: Runtime[Workspace]) -> dict[str, 
         f"Research question: {state['question']}\n\nEvidence:\n\n"
         f"{render_evidence(evidence, state.get('sources', {}), ws)}"
     )
-    structured = ws.llm.with_structured_output(ReportDraft, method="json_schema")
-    try:
-        draft = call_llm(structured, [SystemMessage(prompts.WRITER), HumanMessage(user)], ws.tracer, "writer")
-    except LLMError as exc:
-        ws.tracer.emit("writer", "error", "writer_failed", summary=str(exc)[:200])
-        return {
-            "draft": fallback_draft(evidence),
-            "writer_status": "fallback",
-            "errors": [f"writer: {exc}"],
-        }
-    return {"draft": draft, "writer_status": "ok"}
+    messages = [SystemMessage(prompts.WRITER), HumanMessage(user)]
+    # Try the configured method first, then the alternates: some Ollama models reject
+    # grammar-constrained formats (HTTP 501) but support tool-calling-based structuring.
+    methods = _dedupe([ws.settings.structured_output_method, "function_calling", "json_schema"])
+    last_exc: Exception | None = None
+    for method in methods:
+        try:
+            structured = ws.llm.with_structured_output(ReportDraft, method=method)
+            draft = call_llm(structured, messages, ws.tracer, "writer", retries=0)
+            return {"draft": draft, "writer_status": "ok"}
+        except Exception as exc:  # LLMError, ResponseError (501), schema validation
+            last_exc = exc
+            ws.tracer.emit("writer", "error", "writer_method_failed", summary=f"{method}: {str(exc)[:120]}")
+    ws.tracer.emit("writer", "error", "writer_failed", summary=str(last_exc)[:200])
+    return {
+        "draft": fallback_draft(evidence),
+        "writer_status": "fallback",
+        "errors": [f"writer: {last_exc}"],
+    }
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    seen: list[str] = []
+    for item in items:
+        if item not in seen:
+            seen.append(item)
+    return seen
 
 
 def _deterministic_limitations(state: ResearchState, ws: Workspace, cited_sources: set[str]) -> list[str]:

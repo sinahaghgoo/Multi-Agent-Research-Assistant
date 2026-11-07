@@ -29,6 +29,9 @@ class Settings:
     seed: int = 7
     num_ctx: int = 16384
     llm_timeout_s: float = 240.0
+    # Structured-output method for the report writer. "function_calling" works across Ollama
+    # tool-calling models; some models reject grammar-based "json_schema"/"json_mode" (HTTP 501).
+    structured_output_method: str = "function_calling"
 
     # Web access
     web_enabled: bool = True

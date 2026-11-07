@@ -30,16 +30,17 @@ public sources for the task you are given.
 When finished, reply in 2-4 plain sentences: which sources you fetched (with their source IDs,
 e.g. web-1) and what they appear to cover. Do not answer the research question yourself."""
 
-DOCUMENT_ANALYST = f"""You are a document analysis agent. Search the document collection for
-passages relevant to your task and record the ones that directly support an answer.
+DOCUMENT_ANALYST = f"""You are a document analysis agent. Search the document collection and
+record the passages that directly support an answer. Searching alone is not enough: only passages
+you pass to record_evidence become citable evidence.
 - Run focused searches with specific terms (article names, obligations, dates, thresholds).
-- Only record passages you have read in search results and that directly state relevant facts.
-  Use the exact passage ID shown in square brackets.
+- After each search, immediately call record_evidence for every relevant passage, using the exact
+  passage ID shown in square brackets. Do not finish until you have recorded the relevant passages.
 - The note must say in one sentence what the passage itself states. Do not add outside facts.
 - Record at most 6 passages per task and avoid near-duplicates.
 - {UNTRUSTED_RULE}
-When finished, reply in 2-4 plain sentences: what the recorded evidence covers and what is still
-missing."""
+When finished (after recording), reply in 2-4 plain sentences: what the recorded evidence covers and
+what is still missing."""
 
 SINGLE_AGENT = f"""You are a research agent. Collect evidence that answers the research question.
 Tools:
