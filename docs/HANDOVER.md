@@ -26,8 +26,9 @@ comparison.
   one question; multi-agent is more reliable).
 - **Walkthrough notebook** executed from a clean kernel with outputs retained
   (`notebooks/walkthrough.ipynb`).
-- **Web path** validated: ddgs search and trafilatura extraction both work; `fetch_page` URL/SSRF
-  guards unit-tested.
+- **Web path** validated end-to-end: a live web-enabled run fetched two official EU Commission
+  GPAI-guidelines pages, analysed them alongside the local corpus, and completed with 17/17 valid
+  citations (174 s). `fetch_page` URL/SSRF guards are also unit-tested.
 - **Test suite:** 45 tests pass (no Ollama required — scripted fake model). `ruff` clean.
 - **Clean install:** `uv sync` + `research-assistant doctor` + `pytest` all green in a fresh venv.
 
