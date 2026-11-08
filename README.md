@@ -1,13 +1,11 @@
 # Local Multi-Agent Research Assistant
 
-A research assistant that runs **entirely on local models** (via [Ollama](https://ollama.com)) with
-**no paid APIs**. A supervisor coordinates specialised agents through genuine tool calling to
+A research assistant that runs **entirely on local models** (via [Ollama](https://ollama.com)). A supervisor coordinates specialised agents through genuine tool calling to
 retrieve web sources, analyse documents, and synthesise a **structured, source-backed report** with
 an inspectable execution trace.
 
 The bundled example corpus is **AI governance** — the EU AI Act and two NIST AI Risk Management
-Framework documents — so the demo is useful to a recruiter in a few minutes and the answers are
-checkable against primary sources.
+Framework documents.
 
 > **Why this exists.** It demonstrates agentic workflow design (LangGraph), honest source tracking
 > and citation validation, retrieval over real documents, and disciplined engineering (tests,
@@ -121,26 +119,9 @@ source.
 
 ---
 
-## Models & hardware
-
-Developed and tested on an **Apple M3 Pro, 18 GB RAM, macOS**.
-
-| Config | Model | Download | Notes |
-|---|---|---|---|
-| **Recommended** | `qwen3.5:9b` (Q4) | ~6.6 GB | Apache-2.0. Tools + 256K context. Thinking disabled for faster tool loops. |
-| **Lighter fallback** | `qwen2.5:7b` | ~4.7 GB | Apache-2.0. Faster per run; strong tool calling. Set `RA_CHAT_MODEL=qwen2.5:7b`. |
-| **Embeddings** | `qwen3-embedding:0.6b` | ~0.6 GB | Apache-2.0. 1024-dim, instruction-aware. |
-
-A single 9B model plus the embedder fits comfortably in 18 GB. **Expected limitation:** a 9B model
-occasionally omits inline citations in prose or needs the budget/guard nudges; the fallback 7B is
-faster but slightly weaker at synthesis. Larger models (27B+) are not recommended on 18 GB.
-
----
-
 ## Installation & quickstart
 
-**Prerequisites:** [Ollama](https://ollama.com/download) running locally, and
-[uv](https://docs.astral.sh/uv/).
+**Prerequisites:** [Ollama](https://ollama.com/download) running locally
 
 ```bash
 # 1. Pull the models
@@ -247,8 +228,6 @@ cheaper. These are small-n results on a local 9B model — directional, not a be
 - **Supervisor vs. single agent.** Multiple agents add LLM calls and latency. The split pays off
   for multi-part questions and keeping web vs. document work separate; for simple lookups a single
   agent is as good and cheaper. The baseline quantifies this.
-- **Local models are the constraint.** A 9B model is capable but slower and occasionally sloppy with
-  inline citations — hence the deterministic validation and guards rather than trusting the model.
 - **No vector DB.** At ~800 passages a NumPy matrix is simplest and fastest; a larger corpus would
   warrant FAISS/Qdrant and incremental indexing.
 - **Future:** per-claim NLI-based support scoring; reranking; multi-hop sub-questions; richer
