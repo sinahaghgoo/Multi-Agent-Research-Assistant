@@ -27,7 +27,6 @@
 # > `qwen2.5:7b` is a faster fallback).
 
 # %%
-import os
 import sys
 from pathlib import Path
 

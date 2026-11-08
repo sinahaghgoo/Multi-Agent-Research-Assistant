@@ -24,13 +24,19 @@ research-assistant ask gpai-obligations --mode multi_agent
 > **Q:** *What transparency and documentation obligations does the EU AI Act place on providers of
 > general-purpose AI models?*
 >
-> **Answer.** The EU AI Act requires providers of general-purpose AI models to draw up and maintain
-> technical documentation, provide information to downstream providers who integrate the model, put
-> in place a copyright policy, and publish a summary of training content … Providers of models with
-> systemic risk face additional obligations and may rely on codes of practice. [E2] [E4] [E5]
+> **Answer.** Providers of general-purpose AI models must prepare and keep up-to-date technical
+> documentation for the AI Office and national competent authorities [E1]; this documentation must
+> cover the model's training and testing processes, evaluation results, and the elements in Annex XI
+> [E2]. Providers must also publish a sufficiently detailed summary of the content used for training,
+> per the AI Office template [E3]. These obligations do not apply to models released under a free and
+> open-source licence with publicly available parameters, unless the model carries systemic risk [E3].
 >
-> **Evidence.** [E2] EU AI Act, Article 53 (Obligations for providers of general-purpose AI models);
-> [E4] Annex XII; [E5] Article 55 (…systemic risk). **7/7 citations valid.**
+> **Evidence.** [E1] EU AI Act, Recital 101; [E2] Article 53(1) (technical documentation / Annex XI);
+> [E3] Article 53 (training-content summary and the open-source carve-out). **7/7 citations valid.**
+>
+> *This is the exact output of the committed walkthrough ([`notebooks/walkthrough.ipynb`](notebooks/walkthrough.ipynb),
+> `qwen3.5:9b`, 69 s). Because it runs on a local model, wording and which passages are cited vary run
+> to run; the deterministic citation validation does not.*
 
 Every run returns:
 
@@ -253,14 +259,15 @@ cheaper. These are small-n results on a local 9B model — directional, not a be
 ## Development
 
 ```bash
-uv run pytest            # 43 tests, no Ollama required (scripted fake model)
+uv run pytest            # 45 tests, no Ollama required (scripted fake model)
 uv run ruff check .      # lint
 uv run ruff format .     # format
 ```
 
 Tests cover retrieval, tool guards, agent loops, graph termination and supervisor guards, citation
-validation, and report rendering. Tests needing a live model are marked `@pytest.mark.ollama` and
-skipped by default.
+validation, and report rendering. The whole suite runs **without Ollama** (a scripted fake model
+drives the graph); an `ollama` pytest marker is registered and excluded by default so any live-model
+tests can be added without slowing the default run.
 
 ## Repository layout
 
