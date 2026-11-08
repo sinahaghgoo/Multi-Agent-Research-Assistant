@@ -57,9 +57,9 @@ flowchart TD
     WEB --> SUP
     DOC --> SUP
     WRITER --> FINAL[finalize<br/>citation validation · render]
-    FINAL --> END([report + trace])
+    FINAL --> DONE([report + trace])
 
-    subgraph Evidence store (LangGraph state)
+    subgraph store["Evidence store (LangGraph state)"]
         S[sources] --- E[evidence] --- U[allowed URLs]
     end
     DOC -.records.-> E
